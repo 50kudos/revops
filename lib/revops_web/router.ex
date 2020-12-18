@@ -2,22 +2,22 @@ defmodule RevopsWeb.Router do
   use RevopsWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, {RevopsWeb.LayoutView, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug(:put_root_layout, {RevopsWeb.LayoutView, :root})
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug(:accepts, ["json"])
   end
 
   scope "/", RevopsWeb do
-    pipe_through :browser
+    pipe_through(:browser)
 
-    live "/", PageLive, :index
+    live("/", NodiffLive, :index)
   end
 
   # Other scopes may use custom stacks.
@@ -36,8 +36,8 @@ defmodule RevopsWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/" do
-      pipe_through :browser
-      live_dashboard "/dashboard", metrics: RevopsWeb.Telemetry
+      pipe_through(:browser)
+      live_dashboard("/dashboard", metrics: RevopsWeb.Telemetry)
     end
   end
 end

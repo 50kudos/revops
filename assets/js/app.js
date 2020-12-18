@@ -13,12 +13,25 @@ import "../css/app.scss"
 //     import socket from "./socket"
 //
 import "phoenix_html"
-import {Socket} from "phoenix"
+import { Socket } from "phoenix"
 import NProgress from "nprogress"
-import {LiveSocket} from "phoenix_live_view"
+import { LiveSocket } from "phoenix_live_view"
+
+let mainHook = {
+  mounted() {
+    this.handleEvent("update", ({ selector, ops }) => {
+      let el = document.querySelector(selector)
+      if (ops.replace) { el.innerHTML = ops.replace }
+      if (ops == "remove") { el.closest("li").remove() }
+    })
+  }
+}
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {
+  params: { _csrf_token: csrfToken },
+  hooks: { main: mainHook }
+})
 
 // Show progress bar on live navigation and form submits
 window.addEventListener("phx:page-loading-start", info => NProgress.start())
@@ -32,4 +45,3 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
-

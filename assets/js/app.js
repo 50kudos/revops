@@ -3,6 +3,7 @@
 // its own CSS file.
 import "../css/app.scss"
 
+
 // webpack automatically bundles all modules in your
 // entry points. Those entry points can be configured
 // in "webpack.config.js".
@@ -16,21 +17,22 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import NProgress from "nprogress"
 import { LiveSocket } from "phoenix_live_view"
+import { connectStreamSource, disconnectStreamSource } from "@hotwired/turbo"
 
-let mainHook = {
+let streamHook = {
   mounted() {
-    this.handleEvent("update", ({ selector, ops }) => {
-      let el = document.querySelector(selector)
-      if (ops.replace) { el.innerHTML = ops.replace }
-      if (ops == "remove") { el.closest("li").remove() }
+    connectStreamSource(this.el)
+    this.handleEvent("phx-stream", (data) => {
+      this.el.dispatchEvent(new MessageEvent("message", data))
     })
-  }
+  },
+  destroyed() { disconnectStreamSource(this.el) }
 }
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   params: { _csrf_token: csrfToken },
-  hooks: { main: mainHook }
+  hooks: { stream: streamHook }
 })
 
 // Show progress bar on live navigation and form submits
